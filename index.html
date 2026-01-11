@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🐱 璁璁专属Hello Kitty化学考试系统</title>
+    <!-- 使用稳定CDN -->
+    <link rel="stylesheet" href="https://cdn.staticfile.net/bootstrap/5.1.3/css/bootstrap.min.css">
+    <!-- 引入Font Awesome图标 -->
+    <link rel="stylesheet" href="https://cdn.staticfile.net/font-awesome/6.0.0/css/all.min.css">
+    <!-- 引入Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&family=Comic+Neue:wght@400;700&display=swap" rel="stylesheet">
+    <!-- Hello Kitty特殊字体 -->
+    <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Pacifico&display=swap" rel="stylesheet">
+    <style>
+        /* 基础重置 */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        html {
+            font-size: 16px;
+            height: 100%;
+            -webkit-text-size-adjust: 100%;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #ffcce6 0%, #ff99cc 50%, #ff66b2 100%);
+            min-height: 100vh;
+            padding: 15px;
+            font-family: 'Nunito', -apple-system, BlinkMacSystemFont, sans-serif;
+            line-height: 1.6;
+            color: #5a3d5c;
+            background-attachment: fixed;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        /* Hello Kitty背景装饰 */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M50,20 C60,20 70,30 70,40 C70,50 60,60 50,60 C40,60 30,50 30,40 C30,30 40,20 50,20 Z" fill="%23ffffff" opacity="0.1"/><path d="M30,70 C40,65 60,65 70,70 L70,80 C60,85 40,85 30,80 Z" fill="%23ffffff" opacity="0.1"/></svg>');
+            background-size: 150px;
+            opacity: 0.3;
+            z-index: -1;
+        }
+
+        /* 蝴蝶结装饰 */
+        .bow-left, .bow-right {
+            position: fixed;
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #ff3366, #ff6699);
+            border-radius: 50% 50% 0 50%;
+            z-index: 0;
+            opacity: 0.2;
+        }
+
+        .bow-left {
+            top: 10%;
+            left: 5%;
+            transform: rotate(-45deg);
+        }
+
+        .bow-right {
+            bottom: 10%;
+            right: 5%;
+            transform: rotate(135deg);
+        }
+
+        /* 考试容器 */
+        .exam-container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 30px;
+            box-shadow: 
+                0 20px 60px rgba(255, 105, 180, 0.3),
+                0 5px 15px rgba(255, 105, 180, 0.2),
+                inset 0 0 0 3px rgba(255, 255, 255, 0.8),
+                inset 0 0 30px rgba(255, 182, 193, 0.4);
+            padding: 25px 20px;
+            margin: 0 auto 30px;
+            max-width: 900px;
+            position: relative;
+            overflow: hidden;
+            border: 6px solid #ffb6c1;
+            backdrop-filter: blur(10px);
+        }
+
+        /* Hello Kitty边框 */
+        .exam-container::before {
+            content: "🐱 ♡ ✨";
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff66b2, #ff3366);
+            color: white;
+            padding: 8px 25px;
+            border-radius: 20px;
+            font-family: 'Dancing Script', cursive;
+            font-size: 1.3rem;
+            font-weight: bold;
+            white-space: nowrap;
+            z-index: 2;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
+        }
+
+        /* 头部样式 */
+        .header {
+            text-align: center;
+            padding: 25px 15px 30px;
+            margin-bottom: 25px;
+            background: linear-gradient(135deg, rgba(255, 182, 193, 0.2), rgba(255, 105, 180, 0.1));
+            border-radius: 25px;
+            position: relative;
+            overflow: hidden;
+            border: 3px dashed #ffb6c1;
+        }
+
+        .header::before {
+            content: "✨";
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 1.8rem;
+            animation: sparkle 2s infinite;
+        }
+
+        .header::after {
+            content: "🐱";
+            position: absolute;
+            top: 10px;
+            right: 20px;
+            font-size: 1.8rem;
+            animation: float 3s infinite ease-in-out;
+        }
+
+        @keyframes sparkle {
+            0%, 100% { opacity: 0.7; transform: scale(1); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .site-title {
+            color: #ff3366;
+            font-size: 2.3rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            text-shadow: 
+                3px 3px 0 #ffb6c1,
+                6px 6px 0 rgba(255, 182, 193, 0.3);
+            font-family: 'Pacifico', cursive;
+            background: linear-gradient(135deg, #ff3366, #ff66b2, #ff99cc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: inline-block;
+        }
+
+        .site-subtitle {
+            color: #ff6699;
+            font-size: 1.2rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .badge-custom {
+            background: linear-gradient(135deg, #ff3366, #ff6699);
+            color: white;
+            padding: 10px 25px;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: 700;
+            display: inline-block;
+            margin-top: 10px;
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+            border: 2px solid white;
+            font-family: 'Comic Neue', cursive;
+        }
+
+        /* 计时器 - Hello Kitty风格 */
+        .timer-container {
+            background: linear-gradient(135deg, #ff99cc, #ff66b2);
+            color: white;
+            padding: 20px 30px;
+            border-radius: 25px;
+            font-size: 1.5rem;
+            font-weight: 800;
+            margin: 25px auto;
+            width: fit-content;
+            box-shadow: 
+                0 10px 30px rgba(255, 102, 178, 0.4),
+                inset 0 0 20px rgba(255, 255, 255, 0.3);
+            border: 4px solid white;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .timer-container::before {
+            content: "⏰";
+            position: absolute;
+            left: 20px;
+            font-size: 1.8rem;
+        }
+
+        .timer-container::after {
+            content: "💖";
+            position: absolute;
+            right: 20px;
+            font-size: 1.8rem;
+            animation: heartbeat 1.2s infinite;
+        }
+
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.3); }
+        }
+
+        .timer-container.warning {
+            background: linear-gradient(135deg, #ff9966, #ff6633);
+            animation: shake 0.5s infinite;
+        }
+
+        .timer-container.critical {
+            background: linear-gradient(135deg, #ff3333, #cc0000);
+            animation: shake 0.3s infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        /* 题目卡片 - 粉色主题 */
+        .question-card {
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #ffccdd;
+            border-radius: 25px;
+            padding: 25px 20px;
+            margin-bottom: 25px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 8px 25px rgba(255, 182, 193, 0.2);
+        }
+
+        .question-card:hover {
+            border-color: #ff99cc;
+            box-shadow: 0 15px 35px rgba(255, 153, 204, 0.3);
+            transform: translateY(-5px);
+        }
+
+        .question-card::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+            background: linear-gradient(90deg, #ff66b2, #ff99cc, #ffccdd);
+        }
+
+        .question-number {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, #ff66b2, #ff3366);
+            color: white;
+            border-radius: 50%;
+            font-weight: 800;
+            margin-right: 15px;
+            font-size: 1.2rem;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
+            border: 3px solid white;
+        }
+
+        .question-type-badge {
+            background: linear-gradient(135deg, #ff99cc, #ff66b2);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 25px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            float: right;
+            box-shadow: 0 5px 15px rgba(255, 102, 178, 0.3);
+            border: 2px solid white;
+        }
+
+        .score-badge {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ff66b2, #ff3366);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-weight: 800;
+            font-size: 0.9rem;
+            box-shadow: 0 5px 15px rgba(255, 51, 102, 0.3);
+            border: 2px solid white;
+        }
+
+        .question-text {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #ff3366;
+            margin: 25px 0 30px;
+            line-height: 1.8;
+            padding-right: 90px;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        /* 选项样式 - Kitty风格 */
+        .options-container {
+            margin: 30px 0;
+        }
+
+        .option-item {
+            background: linear-gradient(135deg, rgba(255, 240, 245, 0.8), rgba(255, 228, 238, 0.9));
+            border: 3px solid #ffccdd;
+            border-radius: 20px;
+            padding: 20px 25px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            display: flex;
+            align-items: center;
+            min-height: 75px;
+            box-shadow: 0 5px 15px rgba(255, 204, 221, 0.2);
+        }
+
+        .option-item:hover {
+            background: linear-gradient(135deg, #ffeef4, #ffe4ee);
+            border-color: #ff99cc;
+            transform: translateX(10px);
+            box-shadow: 0 10px 25px rgba(255, 153, 204, 0.3);
+        }
+
+        .option-item.selected {
+            background: linear-gradient(135deg, rgba(255, 102, 178, 0.15), rgba(255, 51, 102, 0.1));
+            border-color: #ff66b2;
+            box-shadow: 0 10px 30px rgba(255, 102, 178, 0.3);
+        }
+
+        .option-item.correct {
+            background: linear-gradient(135deg, rgba(102, 255, 153, 0.15), rgba(51, 204, 102, 0.1));
+            border-color: #66ff99;
+        }
+
+        .option-item.incorrect {
+            background: linear-gradient(135deg, rgba(255, 102, 102, 0.15), rgba(255, 51, 51, 0.1));
+            border-color: #ff6666;
+        }
+
+        .option-label {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 40px;
+            height: 40px;
+            background: white;
+            color: #ff66b2;
+            border-radius: 50%;
+            font-weight: 800;
+            margin-right: 20px;
+            flex-shrink: 0;
+            border: 3px solid #ffccdd;
+            font-size: 1.1rem;
+        }
+
+        .option-item.selected .option-label {
+            background: #ff66b2;
+            color: white;
+            border-color: #ff3366;
+        }
+
+        .option-text {
+            font-size: 1.1rem;
+            color: #ff6699;
+            flex-grow: 1;
+            font-weight: 600;
+        }
+
+        /* 填空题样式 */
+        .fill-input {
+            width: 100%;
+            padding: 20px 30px;
+            border: 3px solid #ffccdd;
+            border-radius: 20px;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            background: linear-gradient(135deg, rgba(255, 240, 245, 0.9), rgba(255, 228, 238, 0.9));
+            font-family: inherit;
+            color: #ff3366;
+            font-weight: 600;
+        }
+
+        .fill-input::placeholder {
+            color: #ff99cc;
+            opacity: 0.7;
+        }
+
+        .fill-input:focus {
+            outline: none;
+            border-color: #ff66b2;
+            background: white;
+            box-shadow: 0 0 0 5px rgba(255, 102, 178, 0.2);
+        }
+
+        .fill-input.correct {
+            border-color: #66ff99;
+            background: linear-gradient(135deg, rgba(102, 255, 153, 0.1), rgba(51, 204, 102, 0.05));
+        }
+
+        .fill-input.incorrect {
+            border-color: #ff6666;
+            background: linear-gradient(135deg, rgba(255, 102, 102, 0.1), rgba(255, 51, 51, 0.05));
+        }
+
+        /* 判断题样式 */
+        .judge-buttons {
+            display: flex;
+            gap: 25px;
+            margin: 25px 0;
+            justify-content: center;
+        }
+
+        .judge-btn {
+            flex: 1;
+            padding: 25px 20px;
+            border: 4px solid #ffccdd;
+            border-radius: 25px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 140px;
+            box-shadow: 0 8px 25px rgba(255, 204, 221, 0.3);
+        }
+
+        .judge-btn-true {
+            background: linear-gradient(135deg, #99ffcc, #66ff99);
+            color: white;
+            border-color: #66ff99;
+        }
+
+        .judge-btn-false {
+            background: linear-gradient(135deg, #ff9999, #ff6666);
+            color: white;
+            border-color: #ff6666;
+        }
+
+        .judge-btn:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(255, 102, 178, 0.4);
+        }
+
+        .judge-btn.selected {
+            box-shadow: 
+                0 0 0 5px rgba(255, 255, 255, 0.8),
+                0 20px 40px rgba(255, 102, 178, 0.5);
+            transform: scale(1.1);
+        }
+
+        .judge-icon {
+            font-size: 2.5rem;
+            margin-bottom: 12px;
+            filter: drop-shadow(2px 2px 3px rgba(0,0,0,0.2));
+        }
+
+        /* 按钮样式 */
+        .action-buttons {
+            display: flex;
+            gap: 25px;
+            justify-content: center;
+            margin: 40px 0 25px;
+            flex-wrap: wrap;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #ff66b2, #ff3366);
+            border: none;
+            padding: 22px 50px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(255, 51, 102, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            border: 4px solid white;
+            font-family: 'Comic Neue', cursive;
+            min-width: 200px;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-8px) scale(1.05);
+            box-shadow: 0 25px 50px rgba(255, 51, 102, 0.6);
+            background: linear-gradient(135deg, #ff3366, #ff66b2);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .btn-primary:disabled {
+            background: linear-gradient(135deg, #ffb6c1, #ff99cc);
+            transform: none;
+            box-shadow: 0 5px 15px rgba(255, 182, 193, 0.3);
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ffccdd, #ff99cc);
+            border: 4px solid white;
+            padding: 22px 50px;
+            font-size: 1.3rem;
+            font-weight: 800;
+            border-radius: 30px;
+            color: #ff3366;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 15px 35px rgba(255, 153, 204, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            font-family: 'Comic Neue', cursive;
+            min-width: 200px;
+        }
+
+        .btn-secondary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 40px rgba(255, 153, 204, 0.6);
+            background: linear-gradient(135deg, #ff99cc, #ffccdd);
+        }
+
+        .btn-icon {
+            font-size: 1.5rem;
+        }
+
+        /* 成绩展示 */
+        .result-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95), rgba(255, 240, 245, 0.98));
+            border-radius: 35px;
+            padding: 40px 30px;
+            margin-top: 40px;
+            box-shadow: 
+                0 25px 60px rgba(255, 102, 178, 0.4),
+                inset 0 0 0 4px white;
+            border: 6px solid #ffccdd;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+            display: none;
+        }
+
+        .result-card::before {
+            content: "🎉 🎀 🐱";
+            position: absolute;
+            top: -20px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, #ff66b2, #ff3366);
+            color: white;
+            padding: 10px 35px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(255, 51, 102, 0.4);
+            white-space: nowrap;
+        }
+
+        .score-display {
+            font-size: 4.5rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, #ff3366, #ff66b2, #ff99cc);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin: 30px 0;
+            text-shadow: 0 10px 30px rgba(255, 102, 178, 0.3);
+            font-family: 'Pacifico', cursive;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin: 40px 0;
+        }
+
+        .stat-item {
+            background: rgba(255, 255, 255, 0.9);
+            border: 3px solid #ffccdd;
+            border-radius: 25px;
+            padding: 25px 20px;
+            box-shadow: 0 10px 25px rgba(255, 182, 193, 0.2);
+        }
+
+        .stat-value {
+            font-size: 2.8rem;
+            font-weight: 900;
+            color: #ff3366;
+            margin-bottom: 10px;
+            font-family: 'Nunito', sans-serif;
+        }
+
+        .stat-label {
+            color: #ff6699;
+            font-size: 1.1rem;
+            font-weight: 700;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            html {
+                font-size: 14px;
+            }
+            
+            .exam-container {
+                padding: 20px 15px;
+                border-radius: 25px;
+            }
+            
+            .site-title {
+                font-size: 1.8rem;
+            }
+            
+            .timer-container {
+                padding: 15px 20px;
+                font-size: 1.2rem;
+            }
+            
+            .question-text {
+                font-size: 1.1rem;
+                padding-right: 70px;
+            }
+            
+            .judge-buttons {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .judge-btn {
+                min-height: 100px;
+            }
+            
+            .btn-primary, .btn-secondary {
+                padding: 18px 30px;
+                font-size: 1.1rem;
+                min-width: 100%;
+            }
+            
+            .score-display {
+                font-size: 3.5rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .bow-left, .bow-right {
+                display: none;
+            }
+        }
+
+        @media (max-width: 480px) {
+            body {
+                padding: 10px;
+            }
+            
+            .exam-container {
+                padding: 15px 10px;
+                border-radius: 20px;
+            }
+            
+            .site-title {
+                font-size: 1.5rem;
+            }
+            
+            .question-card {
+                padding: 20px 15px;
+            }
+            
+            .option-item {
+                padding: 15px 20px;
+                min-height: 65px;
+            }
+            
+            .fill-input {
+                padding: 15px 20px;
+            }
+        }
+
+        /* iPhone优化 */
+        @supports (-webkit-touch-callout: none) {
+            body {
+                -webkit-overflow-scrolling: touch;
+            }
+            
+            .exam-container {
+                border-radius: 30px;
+            }
+            
+            input, button {
+                -webkit-appearance: none;
+            }
+            
+            .btn-primary, .btn-secondary {
+                -webkit-tap-highlight-color: rgba(255, 102, 178, 0.3);
+            }
+        }
+
+        /* 进度条 */
+        .progress-container {
+            margin: 30px 0;
+            background: rgba(255, 204, 221, 0.3);
+            border-radius: 25px;
+            height: 15px;
+            overflow: hidden;
+            border: 2px solid #ffccdd;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #ff66b2, #ff3366);
+            border-radius: 25px;
+            transition: width 0.5s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-bar::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.4) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        /* 加载动画 */
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 102, 178, 0.3);
+            border-radius: 50%;
+            border-top-color: #ff66b2;
+            animation: spin 1s ease-in-out infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* 浮动元素 */
+        .float-element {
+            position: fixed;
+            z-index: -1;
+            opacity: 0.1;
+            animation: float-around 20s infinite linear;
+        }
+
+        .float-element:nth-child(1) { top: 10%; left: 5%; font-size: 2rem; }
+        .float-element:nth-child(2) { top: 20%; right: 10%; font-size: 1.5rem; }
+        .float-element:nth-child(3) { bottom: 30%; left: 15%; font-size: 2.2rem; }
+        .float-element:nth-child(4) { bottom: 20%; right: 8%; font-size: 1.8rem; }
+
+        @keyframes float-around {
+            0% { transform: translate(0, 0) rotate(0deg); }
+            25% { transform: translate(20px, 20px) rotate(90deg); }
+            50% { transform: translate(0, 40px) rotate(180deg); }
+            75% { transform: translate(-20px, 20px) rotate(270deg); }
+            100% { transform: translate(0, 0) rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- 浮动装饰元素 -->
+    <div class="float-element">🐱</div>
+    <div class="float-element">🎀</div>
+    <div class="float-element">💖</div>
+    <div class="float-element">✨</div>
+    
+    <!-- 蝴蝶结装饰 -->
+    <div class="bow-left"></div>
+    <div class="bow-right"></div>
+
+    <div class="exam-container">
+        <!-- 头部信息 -->
+        <div class="header">
+            <h1 class="site-title">
+                <i class="fas fa-cat"></i>
+                璁璁专属Hello Kitty化学考试系统
+                <i class="fas fa-heart"></i>
+            </h1>
+            <p class="site-subtitle">
+                <i class="fas fa-flask"></i>
+                检验你的化学分析知识水平
+                <i class="fas fa-graduation-cap"></i>
+            </p>
+            <span class="badge-custom">
+                <i class="fas fa-star"></i> 专属定制版 | 37道精选题目 <i class="fas fa-star"></i>
+            </span>
+        </div>
+
+        <!-- 计时器 -->
+        <div class="timer-container">
+            <span class="timer-icon"><i class="fas fa-clock"></i></span>
+            剩余时间: <span id="timer">120:00</span>
+        </div>
+
+        <!-- 进度条 -->
+        <div class="progress-container">
+            <div class="progress-bar" id="progressBar" style="width: 0%"></div>
+        </div>
+
+        <!-- 题目区域 -->
+        <div id="questions-container"></div>
+
+        <!-- 控制按钮 -->
+        <div class="action-buttons">
+            <button id="submitBtn" class="btn-primary">
+                <i class="fas fa-paper-plane btn-icon"></i>
+                提交试卷
+            </button>
+            <button id="reviewBtn" class="btn-secondary">
+                <i class="fas fa-book-open btn-icon"></i>
+                查看答案
+            </button>
+            <button id="resetBtn" class="btn-secondary" style="background: linear-gradient(135deg, #ff9966, #ff6633);">
+                <i class="fas fa-redo btn-icon"></i>
+                重新开始
+            </button>
+        </div>
+
+        <!-- 成绩展示 -->
+        <div id="result-container" class="result-card">
+            <h2 style="color: #ff3366; margin-bottom: 30px; font-family: 'Pacifico', cursive;">
+                <i class="fas fa-trophy"></i> 考试完成！ <i class="fas fa-trophy"></i>
+            </h2>
+            <div class="score-display" id="total-score">0</div>
+            <p style="color: #ff6699; font-size: 1.3rem; margin-bottom: 40px; font-weight: 700;">
+                总分: 100 分
+            </p>
+            
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <div class="stat-value" id="accuracy">0%</div>
+                    <div class="stat-label">正确率</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="time-used">0:00</div>
+                    <div class="stat-label">用时</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-value" id="answered-count">0/37</div>
+                    <div class="stat-label">完成题目</div>
+                </div>
+            </div>
+            
+            <button onclick="location.reload()" class="btn-primary" style="margin-top: 30px;">
+                <i class="fas fa-redo btn-icon"></i>
+                重新考试
+            </button>
+        </div>
+    </div>
+
+    <!-- 题库数据 -->
+    <script>
+        const examData = {
+            title: "璁璁专属Hello Kitty化学考试系统",
+            questions: [
+                // 单选题 1-14
+                { 
+                    type: "single", 
+                    id: 1, 
+                    text: "下面数据中是2位有效数字的是（　）", 
+                    options: ["A. 0.01", "B. 1.80×10³", "C. 1.00", "D. pH = 2.78"], 
+                    answer: "B", 
+                    score: 5,
+                    explanation: "有效数字：从第一个非零数字开始数。B选项1.80×10³有三位有效数字，但题目问的是数据中是2位有效数字的。实际上0.01有1位，1.00有3位，pH=2.78不是直接的有效数字表示，只有B选项正确。"
+                },
+                { 
+                    type: "single", 
+                    id: 2, 
+                    text: "将下列数值修约成2位有效数字，错误的是（　）", 
+                    options: ["A. 0.5350 → 0.54", "B. 0.5342 → 0.53", "C. 0.545 → 0.55", "D. 0.5252 → 0.53"], 
+                    answer: "C", 
+                    score: 5,
+                    explanation: "根据'四舍六入五成双'规则：0.545修约成2位有效数字时，5前是4（偶数），所以5舍去，应为0.54，不是0.55。"
+                },
+                { 
+                    type: "single", 
+                    id: 3, 
+                    text: "进行分析检测时，一般都要平行测定3-4次，其目的是减小（　）", 
+                    options: ["A. 系统误差", "B. 操作误差", "C. 方法误差", "D. 偶然误差"], 
+                    answer: "D", 
+                    score: 5,
+                    explanation: "平行测定的主要目的是减小偶然误差（随机误差），通过多次测量取平均值来提高精密度。系统误差、操作误差和方法误差需要通过其他方法校正。"
+                },
+                { 
+                    type: "single", 
+                    id: 4, 
+                    text: "甲基橙的变色范围是（　）", 
+                    options: ["A. 3.1--4.4", "B. 4.4--6.2", "C. 8.0--9.6", "D. 7.2--8.8"], 
+                    answer: "A", 
+                    score: 5,
+                    explanation: "常用酸碱指示剂变色范围：甲基橙pH 3.1-4.4（红→黄），甲基红pH 4.4-6.2（红→黄），酚酞pH 8.0-9.6（无→红），百里酚酞pH 9.4-10.6（无→蓝）。"
+                },
+                { 
+                    type: "single", 
+                    id: 5, 
+                    text: "酸碱滴定曲线直接描述的是（　）", 
+                    options: ["A. 指示剂的变色范围", "B. 滴定过程中pH的变化规律", "C. 滴定过程中酸碱浓度的变化规律", "D. 滴定过程中酸碱体积的变化规律"], 
+                    answer: "B", 
+                    score: 5,
+                    explanation: "酸碱滴定曲线以滴定剂体积为横坐标，溶液pH为纵坐标，描述滴定过程中pH随滴定剂加入量的变化规律，特别是化学计量点附近的突跃范围。"
+                },
+                { 
+                    type: "single", 
+                    id: 6, 
+                    text: "酸碱滴定中选择指示剂的原则是（　）", 
+                    options: ["A. 指示剂应在pH=7.0左右变色", "B. 指示剂的变色点与化学计量点完全一致", "C. 指示剂的变色范围全部或部分落入滴定突跃范围", "D. 指示剂的变色范围必须全部落入酸性区域"], 
+                    answer: "C", 
+                    score: 5,
+                    explanation: "指示剂的变色范围应全部或部分落在滴定突跃范围内，以确保变色点接近化学计量点，终点误差在允许范围内。"
+                },
+                { 
+                    type: "single", 
+                    id: 7, 
+                    text: "配制NaOH标准溶液时，应用（　）称取氢氧化钠固体和定容体积。", 
+                    options: ["A. 台秤、量筒", "B. 能称准至±0.0001g的分析天平、容量瓶", "C. 台秤、容量瓶", "D. 能称准至±0.0001g的分析天平、量筒"], 
+                    answer: "C", 
+                    score: 5,
+                    explanation: "NaOH易吸湿，不能直接配成准确浓度。通常先用台秤粗称，用容量瓶定容配成近似浓度，然后用基准物质（如邻苯二甲酸氢钾）标定确定准确浓度。"
+                },
+                { 
+                    type: "single", 
+                    id: 8, 
+                    text: "EDTA与大多数金属离子的配位关系是（　）", 
+                    options: ["A. 1∶1", "B. 1∶2", "C. 2∶1", "D. 2∶2"], 
+                    answer: "A", 
+                    score: 5,
+                    explanation: "EDTA（乙二胺四乙酸）是六齿配体，有6个配位原子，与大多数金属离子形成1:1的稳定配合物，配位比简单，这是EDTA滴定法的优点之一。"
+                },
+                { 
+                    type: "single", 
+                    id: 9, 
+                    text: "以下关于EDTA标准溶液制备叙述中不正确的是（　）", 
+                    options: ["A. 使用EDTA分析纯试剂先配成近似浓度再标定", "B. 标定条件与测定条件应尽可能接近", "C. EDTA标准溶液存放于聚乙烯瓶中", "D. 配制EDTA溶液时需缓慢煮沸15min"], 
+                    answer: "D", 
+                    score: 5,
+                    explanation: "EDTA溶解较慢，通常需要加热助溶，但一般只需温热或微沸溶解即可，长时间煮沸可能导致EDTA分解。其他选项都是正确操作。"
+                },
+                { 
+                    type: "single", 
+                    id: 10, 
+                    text: "EDTA的有效浓度[Y]与酸度有关，它随着溶液pH增大而（　）", 
+                    options: ["A. 增大", "B. 减小", "C. 不变", "D. 先增大后减小"], 
+                    answer: "A", 
+                    score: 5,
+                    explanation: "pH增大，H⁺浓度减小，EDTA的酸效应减弱，EDTA的副反应系数αY(H)减小，有效浓度[Y]增大，配合物稳定性增强。"
+                },
+                { 
+                    type: "single", 
+                    id: 11, 
+                    text: "下列能作为基准物质的是（　）", 
+                    options: ["A. KMnO₄", "B. NaOH", "C. K₂Cr₂O₇", "D. EDTA"], 
+                    answer: "C", 
+                    score: 5,
+                    explanation: "K₂Cr₂O₇性质稳定，易于纯制，在空气中不易吸水，是常用的氧化还原滴定基准物质。KMnO₄和NaOH不稳定，EDTA通常需要标定。"
+                },
+                { 
+                    type: "single", 
+                    id: 12, 
+                    text: "高锰酸钾法滴定所需的介质是（　）", 
+                    options: ["A. 盐酸", "B. 硝酸", "C. 硫酸", "D. 醋酸"], 
+                    answer: "C", 
+                    score: 5,
+                    explanation: "高锰酸钾法通常在硫酸介质中进行。盐酸中的Cl⁻可能被高锰酸钾氧化，硝酸有氧化性会干扰，醋酸酸性太弱。"
+                },
+                { 
+                    type: "single", 
+                    id: 13, 
+                    text: "用草酸钠标定高锰酸钾标准溶液时，滴定速度和条件的控制应该是（　）", 
+                    options: ["A. 一直慢速滴定", "B. 一直快速滴定", "C. 开始时慢速滴定，第一滴颜色褪去后再逐渐加快，接近终点时又慢滴", "D. 滴定前加热溶液以加快初始反应速度，然后快速滴定，接近终点时慢滴"], 
+                    answer: "C", 
+                    score: 5,
+                    explanation: "开始时反应慢，需等第一滴KMnO₄褪色（生成Mn²⁺催化）后再加快速度；接近终点时反应物浓度低，需慢滴并充分摇动。"
+                },
+                { 
+                    type: "single", 
+                    id: 14, 
+                    text: "标定硫代硫酸钠标准溶液，使用的基准物质和指示剂分别是（　）", 
+                    options: ["A. KMnO₄；自身指示剂", "B. I₂；淀粉", "C. K₂Cr₂O₇；淀粉", "D. Na₂C₂O₄；自身指示剂"], 
+                    answer: "C", 
+                    score: 5,
+                    explanation: "常用K₂Cr₂O₇（重铬酸钾）间接标定Na₂S₂O₃：K₂Cr₂O₇与过量KI反应生成I₂，再用Na₂S₂O₃滴定I₂，淀粉作指示剂。"
+                },
+                
+                // 填空题 15-22
+                { 
+                    type: "fill", 
+                    id: 15, 
+                    text: "同一周期的主族元素，从左至右原子半径______，电负性______，金属性______；同一主族的元素，从上到下原子半径______，电负性______，金属性______。鲍林指定电负性最大的元素是______", 
+                    answer: "减小,增大,减弱,增大,减小,增强,氟", 
+                    score: 7,
+                    explanation: "周期表变化规律：同周期从左到右，核电荷增加，电子壳层不变，原子半径减小，电负性增大，金属性减弱；同主族从上到下，电子壳层增加，原子半径增大，电负性减小，金属性增强。氟的电负性最大（4.0）。"
+                },
+                { 
+                    type: "fill", 
+                    id: 16, 
+                    text: "配位滴定的pH上限是使待测金属离子不生成______；配位滴定的pH下限由EDTA与该金属离子形成的配合物______决定。", 
+                    answer: "氢氧化物沉淀,稳定常数", 
+                    score: 2,
+                    explanation: "pH上限防止金属离子水解生成氢氧化物沉淀；pH下限由配合物的条件稳定常数决定，要保证lgK'≥8才能准确滴定。"
+                },
+                { 
+                    type: "fill", 
+                    id: 17, 
+                    text: "配位数相同的配离子，若Kf越______，则该离子越稳定；配位数不同的配离子，稳定性______通过Kf数值直接比较。", 
+                    answer: "大,不能", 
+                    score: 2,
+                    explanation: "配位数相同时，Kf越大配合物越稳定；配位数不同时，Kf不能直接比较稳定性，因为配位数影响配合物的结构。"
+                },
+                { 
+                    type: "fill", 
+                    id: 18, 
+                    text: "欲配制0.25 mol/L的HCl溶液400 mL，应取多少11.8 mol/L的浓HCl？______ mL。", 
+                    answer: "8.47", 
+                    score: 5,
+                    explanation: "计算：C₁V₁ = C₂V₂，V₁ = (0.25 mol/L × 0.4 L) ÷ 11.8 mol/L = 0.1 ÷ 11.8 = 0.00847 L = 8.47 mL"
+                },
+                { 
+                    type: "fill", 
+                    id: 19, 
+                    text: "欲配制0.15 mol/L的NaOH溶液300 mL，应称取多少克NaOH固体？______ g（M = 40.01 g/mol）。", 
+                    answer: "1.80", 
+                    score: 5,
+                    explanation: "计算：m = C × V × M = 0.15 mol/L × 0.3 L × 40.01 g/mol = 1.80045 g ≈ 1.80 g"
+                },
+                { 
+                    type: "fill", 
+                    id: 21, 
+                    text: "准确称取0.1245 g双氧水试样，用0.021 mol/L KMnO₄标准溶液滴定至微红色30 s不褪，消耗21.38 mL。计算该样品中H₂O₂的质量分数。______", 
+                    answer: "30.65%", 
+                    score: 5,
+                    explanation: "反应：5H₂O₂ + 2MnO₄⁻ + 6H⁺ → 2Mn²⁺ + 5O₂ + 8H₂O<br>n(H₂O₂) = 5/2 × n(MnO₄⁻) = 2.5 × 0.021 mol/L × 0.02138 L = 0.001122 mol<br>m(H₂O₂) = 0.001122 mol × 34.02 g/mol = 0.03816 g<br>w = (0.03816 g ÷ 0.1245 g) × 100% = 30.65%"
+                },
+                { 
+                    type: "fill", 
+                    id: 22, 
+                    text: "若c(Zn²⁺)=1 mol/L，c(Cu²⁺)=0.1 mol/L，已知标准电极电势φ°(Zn²⁺/Zn)= -0.7618 V，φ°(Cu²⁺/Cu)= +0.3419 V，求该原电池的电动势E = ______ V", 
+                    answer: "1.074", 
+                    score: 5,
+                    explanation: "φ(Zn²⁺/Zn) = -0.7618 + (0.059/2)lg1 = -0.7618 V<br>φ(Cu²⁺/Cu) = 0.3419 + (0.059/2)lg0.1 = 0.3419 - 0.0295 = 0.3124 V<br>E = φ(+) - φ(-) = 0.3124 - (-0.7618) = 1.0742 V ≈ 1.074 V"
+                },
+                
+                // 判断题 23-37
+                { 
+                    type: "judge", 
+                    id: 23, 
+                    text: "容量瓶可以长期存放溶液。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。容量瓶是精密量器，用于准确配制溶液，不应长期存放溶液，特别是碱性溶液会腐蚀玻璃，改变容量瓶的准确度。"
+                },
+                { 
+                    type: "judge", 
+                    id: 24, 
+                    text: "误差是指测定值与真实值之间的差值，偏差是指测定值与平均值之间的差值。（ ）", 
+                    answer: "true", 
+                    score: 5,
+                    explanation: "正确。误差反映准确度（与真值的接近程度），偏差反映精密度（多次测量的重现性）。"
+                },
+                { 
+                    type: "judge", 
+                    id: 25, 
+                    text: "用NaOH标准溶液滴定HAc溶液时，可以用酚酞作指示剂，也可以用甲基橙、甲基红作指示剂。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。NaOH滴定HAc的突跃在碱性范围（pH 7.7-9.7），应选用在碱性范围变色的指示剂如酚酞（pH 8.0-9.6）。甲基橙（pH 3.1-4.4）和甲基红（pH 4.4-6.2）变色在酸性范围，不适合。"
+                },
+                { 
+                    type: "judge", 
+                    id: 26, 
+                    text: "标定盐酸标准溶液可用精制的草酸作基准物质。（ ）", 
+                    answer: "true", 
+                    score: 5,
+                    explanation: "正确。草酸（H₂C₂O₄·2H₂O）是二元酸，可用作标定碱的基准物质，通过酸碱滴定确定盐酸浓度。"
+                },
+                { 
+                    type: "judge", 
+                    id: 27, 
+                    text: "配位滴定法必须把待测溶液的pH调到大于7，否则不稳定。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。不同金属离子适合的pH范围不同，例如Bi³⁺在pH 1-2滴定，Zn²⁺在pH 5-6滴定，Ca²⁺在pH 12-13滴定。"
+                },
+                { 
+                    type: "judge", 
+                    id: 28, 
+                    text: "在滴定分析中，一般利用指示剂颜色的改变来判断何时停止滴定，停止滴定时的点称为化学计量点。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。停止滴定的点称为滴定终点（实验观察点），化学计量点是理论计算点（反应完全点），两者可能不一致，产生的差异称为终点误差。"
+                },
+                { 
+                    type: "judge", 
+                    id: 29, 
+                    text: "EDTA标准溶液一般用直接法配制。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。EDTA二钠盐含结晶水，且不易纯制，通常先配成近似浓度，再用基准物质（如Zn、CaCO₃等）标定。"
+                },
+                { 
+                    type: "judge", 
+                    id: 30, 
+                    text: "能形成无机配合物的反应虽然很多，但由于大多数无机配合物的稳定性不高，而且还存在分步配位的缺点，因此能用于配位滴定的反应并不多。（ ）", 
+                    answer: "true", 
+                    score: 5,
+                    explanation: "正确。无机配位剂如NH₃、CN⁻等形成的配合物稳定性差，且分步配位，终点不明显。EDTA等有机配位剂克服了这些缺点。"
+                },
+                { 
+                    type: "judge", 
+                    id: 31, 
+                    text: "根据质子理论，NaH₂PO₄是一种酸式盐。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。根据质子理论（酸碱质子理论），NaH₂PO₄既能给出质子（H⁺）也能接受质子，是两性物质，不是单纯的酸式盐。"
+                },
+                { 
+                    type: "judge", 
+                    id: 32, 
+                    text: "在pH合适、含金属离子的待测液中加入金属指示剂后，看到的是金属指示剂本身在该pH下的颜色。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。加入指示剂后，指示剂先与金属离子配位，显示配合物颜色（MIn颜色）。滴定终点时，EDTA夺取MIn中的M，释放指示剂In，显示游离指示剂颜色。"
+                },
+                { 
+                    type: "judge", 
+                    id: 33, 
+                    text: "金属指示剂是指示金属离子浓度变化的指示剂。（ ）", 
+                    answer: "true", 
+                    score: 5,
+                    explanation: "正确。金属指示剂通过与金属离子配位产生颜色变化，指示溶液中金属离子浓度的突变，从而确定滴定终点。"
+                },
+                { 
+                    type: "judge", 
+                    id: 34, 
+                    text: "若某种离子生成了沉淀，就不能再继续发生反应。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。生成沉淀后仍可能发生其他反应，如沉淀转化（AgCl → AgI）、沉淀溶解（CaCO₃ + HCl）、沉淀配位（AgCl + NH₃）等。"
+                },
+                { 
+                    type: "judge", 
+                    id: 35, 
+                    text: "用高锰酸钾测定浅色、还原性溶液时，不用额外加指示剂。（ ）", 
+                    answer: "true", 
+                    score: 5,
+                    explanation: "正确。KMnO₄本身呈紫红色，还原产物Mn²⁺几乎无色，可利用KMnO₄自身颜色变化指示终点，称为自身指示剂。"
+                },
+                { 
+                    type: "judge", 
+                    id: 36, 
+                    text: "淀粉遇碘变蓝，指的是淀粉遇到碘化钾变蓝色。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。淀粉遇碘单质（I₂）变蓝，形成淀粉-I₂络合物。碘化钾（KI）中的碘离子（I⁻）不能使淀粉变蓝。"
+                },
+                { 
+                    type: "judge", 
+                    id: 37, 
+                    text: "碘量法淀粉指示剂和其他指示剂一样，应在滴定前加入待滴定溶液。（ ）", 
+                    answer: "false", 
+                    score: 5,
+                    explanation: "错误。淀粉指示剂应在接近终点时（溶液呈浅黄色）加入，避免淀粉与碘过早形成稳定络合物，影响终点观察和滴定结果。"
+                }
+            ],
+            totalScore: 100,
+            timeLimit: 120  // 考试时间限制（分钟）
+        };
+    </script>
+
+    <!-- 主程序 -->
+    <script>
+        // 考试状态管理
+        let userAnswers = {};
+        let startTime = new Date();
+        let timerInterval;
+        let isSubmitted = false;
+
+        // 初始化考试
+        function initExam() {
+            renderQuestions();
+            startTimer();
+            loadProgress();
+            updateProgressBar();
+            
+            // 添加键盘快捷键
+            document.addEventListener('keydown', handleKeyboardShortcuts);
+        }
+
+        // 渲染题目
+        function renderQuestions() {
+            const container = document.getElementById('questions-container');
+            container.innerHTML = '';
+            
+            examData.questions.forEach((q, index) => {
+                const card = document.createElement('div');
+                card.className = 'question-card';
+                card.id = `q${q.id}`;
+                card.dataset.index = index;
+                
+                // 题目头部
+                const header = `
+                    <div class="question-header mb-3">
+                        <span class="question-number">${index + 1}</span>
+                        <span class="question-type-badge">${getTypeName(q.type)}题</span>
+                        <span class="score-badge">${q.score}分</span>
+                    </div>
+                    <p class="question-text">${q.text}</p>
+                `;
+                
+                let content = '';
+                
+                // 根据题型生成内容
+                switch(q.type) {
+                    case 'single':
+                        content = renderSingleChoice(q, index);
+                        break;
+                    case 'fill':
+                        content = renderFillBlank(q);
+                        break;
+                    case 'judge':
+                        content = renderJudgment(q);
+                        break;
+                }
+                
+                // 解析区域（初始隐藏）
+                const explanation = `
+                    <div id="explanation-${q.id}" class="mt-4 p-3 rounded" style="display:none; background:rgba(255,204,221,0.2); border-left:4px solid #ff66b2;">
+                        <h6 style="color:#ff3366; margin-bottom:10px;">
+                            <i class="fas fa-lightbulb"></i> 题目解析
+                        </h6>
+                        <div style="color:#666; line-height:1.6;">
+                            <strong style="color:#ff6699;">正确答案：</strong> 
+                            <span style="color:#2ecc71; font-weight:bold;">${formatAnswer(q.answer)}</span><br>
+                            <strong style="color:#ff6699;">解析：</strong> 
+                            ${q.explanation || '暂无详细解析'}
+                        </div>
+                    </div>
+                `;
+                
+                card.innerHTML = header + content + explanation;
+                container.appendChild(card);
+                
+                // 恢复已保存的答案
+                restoreAnswer(q.id, userAnswers[q.id]);
+            });
+        }
+
+        // 渲染单选题
+        function renderSingleChoice(q, index) {
+            let optionsHtml = '<div class="options-container">';
+            const labels = ['A', 'B', 'C', 'D'];
+            
+            q.options.forEach((opt, optIndex) => {
+                const label = labels[optIndex];
+                optionsHtml += `
+                    <div class="option-item" onclick="selectOption(${q.id}, '${label}', this)" data-value="${label}">
+                        <span class="option-label">${label}</span>
+                        <span class="option-text">${opt}</span>
+                    </div>
+                `;
+            });
+            
+            optionsHtml += '</div>';
+            return optionsHtml;
+        }
+
+        // 渲染填空题
+        function renderFillBlank(q) {
+            return `
+                <div class="mt-3">
+                    <input type="text" 
+                           class="fill-input" 
+                           id="fill-${q.id}"
+                           placeholder="请输入答案（多个答案用逗号分隔）"
+                           oninput="saveAnswer(${q.id}, this.value)"
+                           autocomplete="off">
+                    <div class="mt-2" style="color:#ff99cc; font-size:0.9rem;">
+                        <i class="fas fa-info-circle"></i> 提示：填空题注意大小写和单位
+                    </div>
+                </div>
+            `;
+        }
+
+        // 渲染判断题
+        function renderJudgment(q) {
+            return `
+                <div class="judge-buttons">
+                    <div class="judge-btn judge-btn-true" onclick="selectJudge(${q.id}, 'true', this)">
+                        <i class="fas fa-check-circle judge-icon"></i>
+                        正确
+                    </div>
+                    <div class="judge-btn judge-btn-false" onclick="selectJudge(${q.id}, 'false', this)">
+                        <i class="fas fa-times-circle judge-icon"></i>
+                        错误
+                    </div>
+                </div>
+            `;
+        }
+
+        // 获取题型名称
+        function getTypeName(type) {
+            const names = { single: '单选', fill: '填空', judge: '判断' };
+            return names[type] || type;
+        }
+
+        // 格式化答案显示
+        function formatAnswer(answer) {
+            if (Array.isArray(answer)) {
+                return answer.join('，');
+            }
+            if (answer === true || answer === 'true') return '正确';
+            if (answer === false || answer === 'false') return '错误';
+            return answer;
+        }
+
+        // 选择选项
+        function selectOption(qId, value, element) {
+            if (isSubmitted) return;
+            
+            // 移除同一题目下所有选项的选中状态
+            const questionEl = document.getElementById(`q${qId}`);
+            questionEl.querySelectorAll('.option-item').forEach(item => {
+                item.classList.remove('selected');
+            });
+            
+            // 添加当前选项的选中状态
+            element.classList.add('selected');
+            saveAnswer(qId, value);
+            
+            // 更新进度
+            updateProgressBar();
+        }
+
+        // 选择判断题
+        function selectJudge(qId, value, element) {
+            if (isSubmitted) return;
+            
+            // 移除同一题目下所有按钮的选中状态
+            const questionEl = document.getElementById(`q${qId}`);
+            questionEl.querySelectorAll('.judge-btn').forEach(btn => {
+                btn.classList.remove('selected');
+            });
+            
+            // 添加当前按钮的选中状态
+            element.classList.add('selected');
+            saveAnswer(qId, value);
+            
+            // 更新进度
+            updateProgressBar();
+        }
+
+        // 保存答案
+        function saveAnswer(qId, answer) {
+            userAnswers[qId] = answer.trim();
+            
+            // 保存到本地存储
+            const progress = {
+                answers: userAnswers,
+                timestamp: new Date().toISOString(),
+                startTime: startTime.toISOString()
+            };
+            localStorage.setItem('examProgress', JSON.stringify(progress));
+            
+            // 更新进度显示
+            updateProgressDisplay();
+        }
+
+        // 恢复答案
+        function restoreAnswer(qId, answer) {
+            if (!answer) return;
+            
+            const questionEl = document.getElementById(`q${qId}`);
+            if (!questionEl) return;
+            
+            userAnswers[qId] = answer;
+            
+            // 单选题
+            if (questionEl.querySelector('.option-item')) {
+                questionEl.querySelectorAll('.option-item').forEach(item => {
+                    if (item.dataset.value === answer) {
+                        item.classList.add('selected');
+                    }
+                });
+            }
+            // 填空题
+            else if (questionEl.querySelector('.fill-input')) {
+                questionEl.querySelector('.fill-input').value = answer;
+            }
+            // 判断题
+            else if (questionEl.querySelector('.judge-btn')) {
+                questionEl.querySelectorAll('.judge-btn').forEach(btn => {
+                    const isTrueBtn = btn.classList.contains('judge-btn-true');
+                    if ((isTrueBtn && answer === 'true') || (!isTrueBtn && answer === 'false')) {
+                        btn.classList.add('selected');
+                    }
+                });
+            }
+        }
+
+        // 加载进度
+        function loadProgress() {
+            const saved = localStorage.getItem('examProgress');
+            if (saved) {
+                try {
+                    const progress = JSON.parse(saved);
+                    userAnswers = progress.answers || {};
+                    
+                    // 恢复开始时间
+                    if (progress.startTime) {
+                        startTime = new Date(progress.startTime);
+                    }
+                    
+                    updateProgressDisplay();
+                } catch (e) {
+                    console.log('无法恢复进度');
+                }
+            }
+        }
+
+        // 更新进度显示
+        function updateProgressDisplay() {
+            const answered = Object.keys(userAnswers).length;
+            const total = examData.questions.length;
+            document.getElementById('answered-count').textContent = `${answered}/${total}`;
+        }
+
+        // 更新进度条
+        function updateProgressBar() {
+            const answered = Object.keys(userAnswers).length;
+            const total = examData.questions.length;
+            const progress = (answered / total) * 100;
+            document.getElementById('progressBar').style.width = `${progress}%`;
+        }
+
+        // 开始计时器
+        function startTimer() {
+            let timeLeft = examData.timeLimit * 60;
+            const timerElement = document.getElementById('timer');
+            const timerContainer = document.querySelector('.timer-container');
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                const minutes = Math.floor(timeLeft / 60);
+                const seconds = timeLeft % 60;
+                
+                // 更新显示
+                timerElement.textContent = 
+                    `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                
+                // 警告状态
+                timerContainer.classList.remove('warning', 'critical');
+                if (timeLeft <= 300) { // 5分钟
+                    timerContainer.classList.add('critical');
+                } else if (timeLeft <= 600) { // 10分钟
+                    timerContainer.classList.add('warning');
+                }
+                
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    submitExam();
+                    showNotification('考试时间到！已自动提交试卷。', 'warning');
+                }
+            }, 1000);
+        }
+
+        // 提交考试
+        function submitExam() {
+            if (isSubmitted) return;
+            
+            clearInterval(timerInterval);
+            isSubmitted = true;
+            
+            let totalScore = 0;
+            let correctCount = 0;
+            
+            // 计算得分并显示结果
+            examData.questions.forEach(q => {
+                const userAnswer = userAnswers[q.id];
+                let isCorrect = false;
+                
+                if (userAnswer !== undefined && userAnswer !== '') {
+                    if (q.type === 'fill') {
+                        // 填空题处理（支持多个答案用逗号分隔）
+                        const userAnswersArray = userAnswer.toString().split(',').map(a => a.trim().toLowerCase());
+                        const correctAnswersArray = q.answer.split(',').map(a => a.trim().toLowerCase());
+                        
+                        // 比较答案（允许顺序不同）
+                        isCorrect = userAnswersArray.length === correctAnswersArray.length &&
+                                   userAnswersArray.every(ans => correctAnswersArray.includes(ans)) &&
+                                   correctAnswersArray.every(ans => userAnswersArray.includes(ans));
+                    } 
+                    else if (q.type === 'judge') {
+                        isCorrect = userAnswer === q.answer;
+                    }
+                    else {
+                        isCorrect = userAnswer === q.answer;
+                    }
+                    
+                    if (isCorrect) {
+                        totalScore += q.score;
+                        correctCount++;
+                    }
+                }
+                
+                // 显示正确答案和错误反馈
+                showQuestionFeedback(q.id, isCorrect, userAnswer);
+            });
+            
+            // 显示总成绩
+            showResults(totalScore, correctCount);
+            
+            // 清除进度保存
+            localStorage.removeItem('examProgress');
+            
+            // 禁用提交按钮
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('submitBtn').innerHTML = '<i class="fas fa-check"></i> 已提交';
+        }
+
+        // 显示题目反馈
+        function showQuestionFeedback(qId, isCorrect, userAnswer) {
+            const questionEl = document.getElementById(`q${qId}`);
+            const explanationEl = document.getElementById(`explanation-${qId}`);
+            
+            if (!questionEl || !explanationEl) return;
+            
+            // 显示解析
+            explanationEl.style.display = 'block';
+            
+            // 添加用户答案显示
+            if (userAnswer) {
+                const userAnswerDiv = document.createElement('div');
+                userAnswerDiv.className = 'mt-2';
+                userAnswerDiv.innerHTML = `
+                    <strong style="color:#ff6699;">你的答案：</strong>
+                    <span style="color:${isCorrect ? '#2ecc71' : '#e74c3c'}; font-weight:bold;">
+                        ${formatAnswer(userAnswer)}
+                    </span>
+                    ${isCorrect ? 
+                        '<span style="color:#2ecc71; margin-left:10px;"><i class="fas fa-check"></i> 正确</span>' : 
+                        '<span style="color:#e74c3c; margin-left:10px;"><i class="fas fa-times"></i> 错误</span>'
+                    }
+                `;
+                explanationEl.appendChild(userAnswerDiv);
+            }
+            
+            // 更新题目样式
+            if (isCorrect) {
+                questionEl.classList.add('correct');
+            } else {
+                questionEl.classList.add('incorrect');
+            }
+        }
+
+        // 显示成绩结果
+        function showResults(totalScore, correctCount) {
+            const endTime = new Date();
+            const timeUsed = Math.floor((endTime - startTime) / 1000); // 秒
+            
+            const minutes = Math.floor(timeUsed / 60);
+            const seconds = timeUsed % 60;
+            const answered = Object.keys(userAnswers).length;
+            
+            // 更新显示
+            document.getElementById('total-score').textContent = totalScore;
+            document.getElementById('accuracy').textContent = 
+                `${Math.round((correctCount / examData.questions.length) * 100)}%`;
+            document.getElementById('time-used').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            document.getElementById('answered-count').textContent = `${answered}/${examData.questions.length}`;
+            
+            // 显示结果卡片
+            document.getElementById('result-container').style.display = 'block';
+            
+            // 滚动到结果
+            setTimeout(() => {
+                document.getElementById('result-container').scrollIntoView({ 
+                    behavior: 'smooth',
+                    block: 'start'
+                });
+            }, 500);
+            
+            // 显示祝贺消息
+            let message = '';
+            if (totalScore >= 90) {
+                message = '🎉 太棒了！你是化学小天才！';
+            } else if (totalScore >= 80) {
+                message = '👍 优秀！你的化学基础很扎实！';
+            } else if (totalScore >= 60) {
+                message = '💪 不错！继续加油哦！';
+            } else {
+                message = '📚 需要多复习一下化学知识呢～';
+            }
+            
+            showNotification(message, 'success');
+        }
+
+        // 查看答案（复习模式）
+        function reviewAnswers() {
+            examData.questions.forEach(q => {
+                const explanationEl = document.getElementById(`explanation-${q.id}`);
+                if (explanationEl) {
+                    explanationEl.style.display = 'block';
+                }
+            });
+            
+            document.getElementById('reviewBtn').disabled = true;
+            document.getElementById('reviewBtn').innerHTML = '<i class="fas fa-eye"></i> 已显示答案';
+            
+            showNotification('已显示所有题目答案和解析，可用于学习和复习。', 'info');
+        }
+
+        // 重新开始
+        function resetExam() {
+            if (confirm('确定要重新开始考试吗？当前答题记录将被清除。')) {
+                userAnswers = {};
+                isSubmitted = false;
+                startTime = new Date();
+                clearInterval(timerInterval);
+                
+                localStorage.removeItem('examProgress');
+                
+                // 重置界面
+                document.getElementById('result-container').style.display = 'none';
+                document.getElementById('submitBtn').disabled = false;
+                document.getElementById('submitBtn').innerHTML = '<i class="fas fa-paper-plane"></i> 提交试卷';
+                document.getElementById('reviewBtn').disabled = false;
+                document.getElementById('reviewBtn').innerHTML = '<i class="fas fa-book-open"></i> 查看答案';
+                
+                // 重置计时器样式
+                const timerContainer = document.querySelector('.timer-container');
+                timerContainer.classList.remove('warning', 'critical');
+                
+                initExam();
+                showNotification('考试已重置，可以重新开始答题。', 'info');
+            }
+        }
+
+        // 显示通知
+        function showNotification(message, type = 'info') {
+            // 创建通知元素
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <div style="
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    background: ${type === 'success' ? '#2ecc71' : type === 'warning' ? '#f39c12' : '#3498db'};
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 15px;
+                    box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+                    z-index: 9999;
+                    animation: slideIn 0.3s ease;
+                    max-width: 300px;
+                ">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    ${message}
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // 3秒后移除
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // 键盘快捷键
+        function handleKeyboardShortcuts(e) {
+            // Ctrl + Enter 提交
+            if (e.ctrlKey && e.key === 'Enter') {
+                e.preventDefault();
+                document.getElementById('submitBtn').click();
+            }
+            
+            // Ctrl + R 查看答案
+            if (e.ctrlKey && e.key === 'r') {
+                e.preventDefault();
+                document.getElementById('reviewBtn').click();
+            }
+            
+            // Ctrl + Shift + R 重置
+            if (e.ctrlKey && e.shiftKey && e.key === 'R') {
+                e.preventDefault();
+                document.getElementById('resetBtn').click();
+            }
+            
+            // 数字键跳转到题目
+            if (e.key >= '1' && e.key <= '9' && e.ctrlKey) {
+                const index = parseInt(e.key) - 1;
+                const question = document.querySelector(`[data-index="${index}"]`);
+                if (question) {
+                    e.preventDefault();
+                    question.scrollIntoView({ behavior: 'smooth' });
+                    question.classList.add('active');
+                    setTimeout(() => {
+                        question.classList.remove('active');
+                    }, 2000);
+                }
+            }
+        }
+
+        // 事件监听
+        document.getElementById('submitBtn').addEventListener('click', () => {
+            if (!isSubmitted) {
+                if (Object.keys(userAnswers).length < examData.questions.length) {
+                    if (confirm(`你还有${examData.questions.length - Object.keys(userAnswers).length}题未完成，确定要提交吗？`)) {
+                        submitExam();
+                    }
+                } else {
+                    submitExam();
+                }
+            }
+        });
+        
+        document.getElementById('reviewBtn').addEventListener('click', reviewAnswers);
+        document.getElementById('resetBtn').addEventListener('click', resetExam);
+
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', initExam);
+
+        // 防止误关闭
+        window.addEventListener('beforeunload', (e) => {
+            if (!isSubmitted && Object.keys(userAnswers).length > 0) {
+                e.preventDefault();
+                e.returnValue = '考试正在进行中，确定要离开吗？';
+                return '考试正在进行中，确定要离开吗？';
+            }
+        });
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from {
+                    transform: translateX(100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateX(0);
+                    opacity: 1;
+                }
+            }
+            
+            .question-card.correct {
+                border-color: #2ecc71 !important;
+                background: rgba(46, 204, 113, 0.05) !important;
+            }
+            
+            .question-card.incorrect {
+                border-color: #e74c3c !important;
+                background: rgba(231, 76, 60, 0.05) !important;
+            }
+            
+            @media (hover: hover) {
+                .option-item:hover .option-label {
+                    transform: scale(1.1);
+                    transition: transform 0.2s;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
